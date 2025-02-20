@@ -9,12 +9,9 @@ public class AuthenticationTest {
         RequestSpecBuilder requestSpecBuilder = new RequestSpecBuilder()
                 .setBaseUri("https://restful-booker.herokuapp.com")   // Set API base url
                 .setBasePath("/auth")   // Set endpoint with path parameters
-
-
                 .setContentType(ContentType.JSON)   // Set Content-Type header
                 .setAccept(ContentType.ANY)   // Set Accept header
-
-                .setBody("{\n    \"username\": \"admin\",\n    \"password\": \"password123\"\n}");
+                .setBody("{\n\"username\": \"admin\",\n    \"password\": \"password123\"\n}");
 
         RestAssured
                 .given(requestSpecBuilder.build()).log().all()
