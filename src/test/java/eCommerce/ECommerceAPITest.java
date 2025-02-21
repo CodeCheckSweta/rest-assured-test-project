@@ -6,6 +6,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.testng.Assert;
+
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
@@ -22,7 +24,7 @@ public class ECommerceAPITest {
 		LoginRequest loginRequest = new LoginRequest();
 		loginRequest.setUserEmail("sweta.singh0322@gmail.com");
 		loginRequest.setUserPassword("Sweta@12345");
-		RequestSpecification reqLogin = given().log().all().spec(req).body(loginRequest);
+		RequestSpecification reqLogin = given().relaxedHTTPSValidation().log().all().spec(req).body(loginRequest);
 		LoginResponse loginResponse = reqLogin.when().post("api/ecom/auth/login")
 								.then().log().all().extract().response().as(LoginResponse.class);
 		String token = loginResponse.token;
@@ -53,10 +55,20 @@ public class ECommerceAPITest {
 		orders.setOrders(orderDetailList);
 		
 		RequestSpecification createOrderReq = given().log().all().spec(createOrderBaseReq).body(orders);
-		String responseCreateOrder = createOrderReq.when().post("api/ecom/order/create-order").then().log().all().extract().response().asPrettyString();
+		String responseCreateOrder = createOrderReq.when().post("api/ecom/order/create-order")
+				.then().log().all().extract().response().asPrettyString();
+		JsonPath js1 = new JsonPath(responseCreateOrder);
+		String productOrderId = js1.get("productOrderId");
+		System.out.println(productOrderId);
 		
 		//Delete Order
-		//RequestSpecification deleteOrderBaseReq = new RequestSpecBuilder().setBaseUri("https://rahulshettyacademy.com").a
+		RequestSpecification deleteOrderBaseReq = new RequestSpecBuilder().setBaseUri("https://rahulshettyacademy.com")
+				.addHeader("Authorization", token).build();
+		RequestSpecification deleteOrderReq = given().log().all().spec(deleteOrderBaseReq).pathParam("productId", productId);
+		String deleteProductResponse = deleteOrderReq.when().delete("api/ecom/product/delete-product/{productId}")
+				.then().log().all().extract().response().asPrettyString();
+		JsonPath js2 = new JsonPath(deleteProductResponse);
+		Assert.assertEquals("Product Deleted Successfully", js2.get("message"));
 	}
 
 }
